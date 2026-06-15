@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/constants/roles.dart';
 import '../../core/services/auth_service.dart';
 
@@ -39,6 +41,39 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
       if (role == UserRole.mainAdmin) {
         if ((email == 'pavaneshvuchuru@gmail' || email == 'pavaneshvuchuru@gmail.com') && password == 'V.pavanesh\$13') {
+          try {
+            // Attempt to sign in the main admin via Firebase Auth
+            final authService = ref.read(authServiceProvider);
+            try {
+              await authService.loginWithEmail('pavaneshvuchuru@gmail.com', 'V.pavanesh\$13');
+            } on FirebaseAuthException catch (authError) {
+              // If user is not found, automatically register them in Firebase Auth
+              if (authError.code == 'user-not-found') {
+                final cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                  email: 'pavaneshvuchuru@gmail.com',
+                  password: 'V.pavanesh\$13',
+                );
+                // Create user document with main_admin role in Firestore
+                await FirebaseFirestore.instance.collection('users').doc(cred.user!.uid).set({
+                  'uid': cred.user!.uid,
+                  'name': 'Main Admin',
+                  'email': 'pavaneshvuchuru@gmail.com',
+                  'role': 'main_admin',
+                  'status': 'approved',
+                  'createdAt': FieldValue.serverTimestamp(),
+                });
+              } else {
+                rethrow;
+              }
+            }
+          } catch (e) {
+            if (!mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Firebase Auth initialization error: $e')),
+            );
+            setState(() => _isLoading = false);
+            return;
+          }
           if (!mounted) return;
           context.go('/main_admin/dashboard');
         } else {
