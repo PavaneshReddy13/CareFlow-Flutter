@@ -22,7 +22,7 @@ jobs:
         run: flutter pub get
 
       - name: Build Flutter Web
-        run: flutter build web --release --base-href "/CareFlow-Flutter/"
+        run: flutter build web --release --base-href "/pdd-modile/"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -35,7 +35,7 @@ jobs:
 
       - name: Serve Web Build locally for E2E Tests
         run: |
-          npx serve -s build/web -p 50000 &
+          npx -y serve -s build/web -p 50000 &
           sleep 5
 
       - name: Run Selenium E2E Tests
