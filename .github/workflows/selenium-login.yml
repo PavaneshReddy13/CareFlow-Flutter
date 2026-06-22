@@ -45,7 +45,7 @@ jobs:
         working-directory: ./selenium_tests
         env:
           CI: true
-        run: node test_e2e.js
+        run: python tests/e2e_test.py
 
       - name: Upload Web Build
         uses: actions/upload-artifact@v4
@@ -57,8 +57,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: selenium-web-excel-report
-          path: selenium_tests/*.xlsx
+          name: selenium-web-report
+          path: selenium_tests/combined_report.txt
 
       - name: Upload Selenium Screenshots
         if: always()
@@ -87,14 +87,14 @@ jobs:
 
       - name: Run Appium Mobile Python Tests
         working-directory: ./appium_tests
-        run: python test_e2e_mobile.py
+        run: python tests/e2e_test.py
 
       - name: Upload Appium Test Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: appium-mobile-excel-report
-          path: appium_tests/*.xlsx
+          name: appium-mobile-report
+          path: appium_tests/combined_report.txt
 
       - name: Upload Appium Screenshots
         if: always()
@@ -136,14 +136,14 @@ jobs:
       - name: Download Selenium Reports
         uses: actions/download-artifact@v4
         with:
-          name: selenium-web-excel-report
+          name: selenium-web-report
           path: reports/selenium
         continue-on-error: true
 
       - name: Download Appium Reports
         uses: actions/download-artifact@v4
         with:
-          name: appium-mobile-excel-report
+          name: appium-mobile-report
           path: reports/appium
         continue-on-error: true
 
